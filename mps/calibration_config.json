@@ -1,0 +1,25 @@
+{
+  "ensemble_weights": {
+    "muril": 0.8500000000000001,
+    "xlmr": 0.1499999999999999
+  },
+  "thresholds": {
+    "polarization": 0.5099999999999998,
+    "political": 0.4999999999999998,
+    "racial/ethnic": 0.5399999999999998,
+    "religious": 0.5699999999999997,
+    "gender/sexual": 0.4999999999999998,
+    "other": 0.4899999999999998,
+    "stereotype": 0.5099999999999998,
+    "vilification": 0.4899999999999998,
+    "dehumanization": 0.5099999999999998,
+    "extreme_language": 0.5299999999999998,
+    "lack_of_empathy": 0.4999999999999998,
+    "invalidation": 0.4799999999999998
+  },
+  "macro_f1": 0.47275639843732226,
+  "models": {
+    "muril": "google/muril-base-cased",
+    "xlmr": "xlm-roberta-base"
+  }
+}
