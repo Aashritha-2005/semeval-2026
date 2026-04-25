@@ -1,0 +1,15 @@
+{
+  "model": "google/muril-base-cased",
+  "model_key": "muril",
+  "polar_threshold": 0.6200000000000003,
+  "polar_f1": 0.908502024291498,
+  "manif_thresholds": {
+    "stereotype": 0.15,
+    "vilification": 0.15,
+    "dehumanization": 0.17,
+    "extreme_language": 0.15,
+    "lack_of_empathy": 0.15,
+    "invalidation": 0.28000000000000014
+  },
+  "manif_macro_f1": 0.41390509837961204
+}
