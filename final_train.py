@@ -10,9 +10,7 @@ from sklearn.metrics import f1_score
 from tqdm import tqdm
 import re
 
-# =========================
-# SETUP
-# =========================
+
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 def set_seed(seed=42):
@@ -31,15 +29,9 @@ LABEL_COLUMNS = [
     "invalidation"
 ]
 
-# =========================
-# CLEAN TEXT
-# =========================
 def clean_text(text):
     return re.sub(r'[^\u0C00-\u0C7F\s]', '', str(text))
 
-# =========================
-# DATASET
-# =========================
 class MultiLabelDataset(Dataset):
     def __init__(self, texts, labels, tokenizer):
         texts = texts.apply(clean_text)
@@ -61,9 +53,7 @@ class MultiLabelDataset(Dataset):
     def __len__(self):
         return len(self.labels)
 
-# =========================
-# CLASS WEIGHTS (KEY FIX)
-# =========================
+# CLASS WEIGHTS 
 def get_class_weights(labels):
     pos = labels.sum(axis=0)
     neg = len(labels) - pos
@@ -73,9 +63,7 @@ def get_class_weights(labels):
 
     return torch.tensor(weights.values, dtype=torch.float).to(DEVICE)
 
-# =========================
 # TRAIN
-# =========================
 def train_model(model, loader, weights):
     optimizer = AdamW(model.parameters(), lr=1e-5)
     loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=weights)
@@ -100,9 +88,7 @@ def train_model(model, loader, weights):
 
     return model
 
-# =========================
 # PREDICT
-# =========================
 def predict(model, tokenizer, texts):
     model.eval()
 
@@ -124,9 +110,7 @@ def predict(model, tokenizer, texts):
 
     return probs.cpu().numpy()
 
-# =========================
 # THRESHOLD TUNING
-# =========================
 def tune_thresholds(y_true, probs):
     thresholds = []
 
@@ -146,11 +130,9 @@ def tune_thresholds(y_true, probs):
 
     return thresholds
 
-# =========================
 # MAIN
-# =========================
 def main():
-    print("🚀 Loading cleaned dataset...")
+    print(" Loading cleaned dataset...")
     df = pd.read_csv("cleaned_train.csv")
 
     texts = df["text"]
@@ -178,14 +160,14 @@ def main():
     dataset = MultiLabelDataset(train_texts, train_labels, tokenizer)
     loader = DataLoader(dataset, batch_size=8, shuffle=True)
 
-    # 🔥 CLASS WEIGHTS
+    #  CLASS WEIGHTS
     weights = get_class_weights(train_labels)
 
     # TRAIN
     model = train_model(model, loader, weights)
 
     # EVALUATE
-    print("\n🔍 Evaluating...")
+    print("\n Evaluating...")
     probs = predict(model, tokenizer, val_texts.tolist())
 
     thresholds = tune_thresholds(val_labels.values, probs)
@@ -198,7 +180,7 @@ def main():
 
     score = f1_score(val_labels.values, preds, average="macro")
 
-    print("\n🔥 FINAL MACRO F1:", score)
+    print("\n FINAL MACRO F1:", score)
 
 
 if __name__ == "__main__":
