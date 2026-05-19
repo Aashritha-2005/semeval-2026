@@ -1,14 +1,6 @@
 """
 Quick single-model trainer for fast iteration.
 Use this to test one model at a time before running the full ensemble.
-
-Usage (Mac, ~20 min per model):
-  python train_single.py --data_path tel_train.csv --model mdeberta --device mps
-  python train_single.py --data_path tel_train.csv --model xlmr --device mps
-  python train_single.py --data_path tel_train.csv --model muril --device mps
-
-Usage (Colab GPU, ~5 min per model):
-  python train_single.py --data_path tel_train.csv --model mdeberta --device cuda
 """
 
 import os
