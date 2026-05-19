@@ -1,10 +1,3 @@
-"""
-Inference for v2 pipeline (Subtask 3 only).
-
-Usage:
-  python inference_v2.py --test_path tel_test.csv --device mps
-"""
-
 import os
 import json
 import argparse
