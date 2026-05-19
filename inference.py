@@ -1,14 +1,8 @@
 """
-Inference script for SemEval-2026 Task 9 - Subtask 3 (Telugu)
+Inference script:
 Loads trained model checkpoints, runs ensemble inference, applies
 calibrated thresholds and post-processing.
 
-Usage:
-  python inference.py \
-    --test_path tel_test.csv \
-    --model_dir ./output \
-    --config_path ./output/calibration_config.json \
-    --output_path ./output/submission.csv
 """
 
 import os
