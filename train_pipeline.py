@@ -1,22 +1,9 @@
 """
-SemEval-2026 Task 9 - Subtask 3: Manifestation Identification (Telugu)
-Multi-Stage Pipeline with Calibrated Ensembles and Lexical Post-Processing
-
 Architecture:
   Stage 1: Multi-model ensemble (mDeBERTa-v3-base, XLM-RoBERTa-base, MuRIL)
   Stage 2: 5-fold CV with 2 seeds, out-of-fold logit averaging
   Stage 3: Per-class threshold calibration via macro-F1 optimization
   Stage 4: Lexical post-processing (polarization=0 => all others=0)
-
-Usage:
-  python train_pipeline.py --data_path tel_train.csv --output_dir ./output
-  
-  For Google Colab with GPU:
-    python train_pipeline.py --data_path tel_train.csv --output_dir ./output --device cuda
-
-  For Mac (MPS or CPU):
-    python train_pipeline.py --data_path tel_train.csv --output_dir ./output --device mps
-    python train_pipeline.py --data_path tel_train.csv --output_dir ./output --device cpu
 """
 
 import os
@@ -38,9 +25,7 @@ from scipy.optimize import minimize
 
 warnings.filterwarnings("ignore")
 
-# ─────────────────────────────────────────────────
 # CONFIG
-# ─────────────────────────────────────────────────
 LABEL_COLS = [
     "polarization", "political", "racial/ethnic", "religious",
     "gender/sexual", "other", "stereotype", "vilification",
@@ -78,9 +63,6 @@ N_FOLDS = 5
 SEEDS = [42, 2026]
 
 
-# ─────────────────────────────────────────────────
-# DATASET
-# ─────────────────────────────────────────────────
 class PolarizationDataset(Dataset):
     def __init__(self, texts, labels, tokenizer, max_len):
         self.texts = texts
@@ -110,9 +92,6 @@ class PolarizationDataset(Dataset):
         return item
 
 
-# ─────────────────────────────────────────────────
-# MODEL
-# ─────────────────────────────────────────────────
 class MultiLabelClassifier(nn.Module):
     def __init__(self, model_name, num_labels=12, dropout=0.1):
         super().__init__()
@@ -133,10 +112,7 @@ class MultiLabelClassifier(nn.Module):
         logits = self.classifier(pooled)
         return logits
 
-
-# ─────────────────────────────────────────────────
 # TRAINING UTILITIES
-# ─────────────────────────────────────────────────
 def set_seed(seed):
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -183,10 +159,7 @@ def predict(model, loader, device):
         all_logits.append(logits.cpu().numpy())
     return np.concatenate(all_logits, axis=0)
 
-
-# ─────────────────────────────────────────────────
 # THRESHOLD CALIBRATION
-# ─────────────────────────────────────────────────
 def optimize_thresholds(logits, labels):
     """Per-class threshold optimization to maximize macro F1."""
     n_labels = labels.shape[1]
@@ -205,10 +178,7 @@ def optimize_thresholds(logits, labels):
         best_thresholds[i] = best_t
     return best_thresholds
 
-
-# ─────────────────────────────────────────────────
 # LEXICAL POST-PROCESSING
-# ─────────────────────────────────────────────────
 def apply_post_processing(preds):
     """
     Rule: If polarization=0, set all other labels to 0.
@@ -216,14 +186,10 @@ def apply_post_processing(preds):
     never has any manifestation labels.
     """
     preds = preds.copy()
-    mask = preds[:, 0] == 0  # polarization column
+    mask = preds[:, 0] == 0  
     preds[mask, 1:] = 0
     return preds
 
-
-# ─────────────────────────────────────────────────
-# MAIN PIPELINE
-# ─────────────────────────────────────────────────
 def run_single_model(model_key, config, df, device, output_dir):
     """Train a single model with K-fold CV and multiple seeds. Returns OOF logits."""
     print(f"\n{'='*60}")
