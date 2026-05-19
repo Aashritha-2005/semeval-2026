@@ -1,7 +1,4 @@
 """
-SemEval-2026 Task 9 – Subtask 3: Manifestation Identification (Telugu)
-Rewritten pipeline targeting macro F1 >= 0.70
-
 Architecture:
   Stage A: Binary polarization classifier (high recall)
   Stage B: 6-label manifestation classifier (trained on polarized-only subset)
@@ -15,11 +12,6 @@ Key improvements over v1:
   - Focal loss for rare class handling (dehumanization at 4.6%)
   - Label-aware threshold grid per fold
   - 5-fold × 2 seeds with logit averaging
-
-Usage:
-  python train_v2.py --data_path tel_train.csv --model muril --device mps
-  python train_v2.py --data_path tel_train.csv --model xlmr --device mps
-  python train_v2.py --data_path tel_train.csv --model mdeberta --device cpu
 """
 
 import os
@@ -38,7 +30,6 @@ from sklearn.metrics import f1_score
 
 warnings.filterwarnings("ignore")
 
-# ── Subtask 3 labels ONLY ──
 MANIFESTATION_COLS = [
     "stereotype", "vilification", "dehumanization",
     "extreme_language", "lack_of_empathy", "invalidation"
@@ -54,10 +45,7 @@ MODEL_CONFIGS = {
 N_FOLDS = 5
 SEEDS = [42, 2026]
 
-
-# ─────────────────────────────────────────────
 # FOCAL LOSS (handles class imbalance better than BCE)
-# ─────────────────────────────────────────────
 class FocalLoss(nn.Module):
     def __init__(self, alpha=None, gamma=2.0):
         super().__init__()
@@ -77,9 +65,6 @@ class FocalLoss(nn.Module):
         return (focal_weight * bce).mean()
 
 
-# ─────────────────────────────────────────────
-# DATASET
-# ─────────────────────────────────────────────
 class TextDataset(Dataset):
     def __init__(self, texts, labels, tokenizer, max_len):
         self.texts = texts
@@ -107,10 +92,7 @@ class TextDataset(Dataset):
             item["labels"] = torch.tensor(self.labels[idx], dtype=torch.float)
         return item
 
-
-# ─────────────────────────────────────────────
 # MODEL: Multi-pool classifier
-# ─────────────────────────────────────────────
 class MultiPoolClassifier(nn.Module):
     """
     Concatenates CLS token + mean pool + max pool for richer representation.
@@ -149,9 +131,7 @@ class MultiPoolClassifier(nn.Module):
         return self.fc2(x)
 
 
-# ─────────────────────────────────────────────
 # TRAINING
-# ─────────────────────────────────────────────
 def set_seed(seed):
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -188,10 +168,7 @@ def optimize_thresholds(logits, labels):
         thresholds[i] = best_t
     return thresholds
 
-
-# ─────────────────────────────────────────────
 # STAGE A: Polarization binary classifier
-# ─────────────────────────────────────────────
 def train_polarization_detector(texts, labels_polar, tokenizer, config, device, output_dir, seed):
     """Train binary polarization detector. Returns OOF probabilities."""
     print(f"\n  [Stage A] Polarization detector (seed={seed})")
@@ -259,9 +236,7 @@ def train_polarization_detector(texts, labels_polar, tokenizer, config, device, 
     return oof_probs
 
 
-# ─────────────────────────────────────────────
 # STAGE B: Manifestation multi-label classifier
-# ─────────────────────────────────────────────
 def train_manifestation_classifier(texts_all, labels_all, labels_polar_all, tokenizer, config, device, output_dir, model_key, seed):
     """
     Train manifestation classifier using ALL samples.
@@ -353,9 +328,7 @@ def train_manifestation_classifier(texts_all, labels_all, labels_polar_all, toke
     return oof_logits
 
 
-# ─────────────────────────────────────────────
 # MAIN
-# ─────────────────────────────────────────────
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_path", type=str, required=True)
