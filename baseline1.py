@@ -20,15 +20,11 @@ LABEL_COLUMNS = [
     "invalidation"
 ]
 
-# =========================
 # CLEAN TEXT
-# =========================
+
 def clean_text(text):
     return re.sub(r'[^\u0C00-\u0C7F\s]', '', str(text))
 
-# =========================
-# DATASET
-# =========================
 class TeluguDataset(Dataset):
     def __init__(self, texts, labels, tokenizer):
         texts = texts.apply(clean_text)
@@ -50,9 +46,8 @@ class TeluguDataset(Dataset):
     def __len__(self):
         return len(self.labels)
 
-# =========================
 # MODEL
-# =========================
+
 class ModelWrapper:
     def __init__(self):
         self.tokenizer = AutoTokenizer.from_pretrained("xlm-roberta-base")
@@ -63,9 +58,8 @@ class ModelWrapper:
             hidden_dropout_prob=0.2
         ).to(DEVICE)
 
-# =========================
+
 # CLASS WEIGHTS
-# =========================
 def get_weights(labels):
     pos = labels.sum(axis=0)
     neg = len(labels) - pos
@@ -75,9 +69,8 @@ def get_weights(labels):
 
     return torch.tensor(weights.values, dtype=torch.float).to(DEVICE)
 
-# =========================
+
 # TRAIN
-# =========================
 def train_model(wrapper, loader, weights):
     optimizer = AdamW(wrapper.model.parameters(), lr=1e-5)
     loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=weights)
@@ -102,9 +95,8 @@ def train_model(wrapper, loader, weights):
 
     return wrapper
 
-# =========================
+
 # PREDICT
-# =========================
 def predict(wrapper, texts):
     wrapper.model.eval()
 
@@ -126,9 +118,8 @@ def predict(wrapper, texts):
 
     return probs.cpu().numpy()
 
-# =========================
+
 # THRESHOLD TUNING
-# =========================
 def tune_thresholds(y_true, probs):
     thresholds = []
 
@@ -148,13 +139,13 @@ def tune_thresholds(y_true, probs):
 
     return thresholds
 
-# =========================
+
 # MAIN
-# =========================
+
 def main():
     df = pd.read_csv("tel_train.csv")
 
-    # 🔥 UPSAMPLE RARE LABELS
+    # UPSAMPLE RARE LABELS
     rare_labels = ["dehumanization", "stereotype"]
     rare_df = df[df[rare_labels].sum(axis=1) > 0]
 
@@ -183,7 +174,7 @@ def main():
 
     probs = predict(wrapper, val_texts.tolist())
 
-    # 🔥 TUNE THRESHOLDS
+    # TUNE THRESHOLDS
     thresholds = tune_thresholds(val_labels.values, probs)
     print("Best thresholds:", thresholds)
 
