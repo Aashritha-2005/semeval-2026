@@ -1,6 +1,6 @@
 # SemEval-2026 (POLAR): Polarization Manifestation Identification in Telugu
 
-A multilingual NLP system for **SemEval-2026 Task 9 (POLAR), Subtask 3: Manifestation Identification**, focused on detecting *how* polarization is expressed in Telugu and Telugu-English social media text.
+A multilingual NLP system for **SemEval-2026, Subtask 3: Manifestation Identification**, focused on detecting *how* polarization is expressed in Telugu and Telugu-English social media text.
 
 The project studies two complementary approaches under a low-resource, highly imbalanced setting:
 
@@ -326,7 +326,6 @@ This project explores how prompt design, multilingual representation learning, i
 | Best prompt-based result (filtered 126-example validation) | **0.605 Macro-F1** |
 | Best multilingual encoder ensemble | **0.473 OOF Macro-F1** |
 | ASL + label smoothing failure case | 0.155 OOF Macro-F1 |
-| Dehumanization training positives | 59 |
 | Encoder evaluation protocol | 5-fold stratified CV |
 
 The project emphasizes measurement-driven experimentation and error analysis, rather than reporting only a single final model score.
